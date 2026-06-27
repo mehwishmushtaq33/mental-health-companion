@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ذہنی صحت کا ساتھی</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 620px;
+            width: 100%;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+        }
+        .header { text-align: center; margin-bottom: 28px; }
+        .header .icon { font-size: 56px; margin-bottom: 8px; }
+        .header h1 { font-size: 26px; color: #2d2d7a; font-weight: 700; }
+        .header .sub {
+            font-size: 13px; color: #888; margin-top: 5px;
+            background: #f0f0ff; padding: 6px 14px;
+            border-radius: 20px; display: inline-block;
+        }
+        .input-label {
+            font-size: 15px; color: #444;
+            margin-bottom: 8px; font-weight: 600;
+        }
+        textarea {
+            width: 100%; padding: 16px;
+            border: 2px solid #e0e0f0;
+            border-radius: 14px; font-size: 16px;
+            font-family: 'Segoe UI', sans-serif;
+            resize: none; height: 130px;
+            direction: rtl; text-align: right;
+            transition: border 0.3s; outline: none;
+            background: #fafafe; color: #333;
+            line-height: 1.6;
+        }
+        textarea:focus { border-color: #5c6bc0; background: #fff; }
+        textarea::placeholder { color: #bbb; }
+        .btn {
+            width: 100%; padding: 16px;
+            background: linear-gradient(135deg, #5c6bc0, #3949ab);
+            color: white; border: none;
+            border-radius: 14px; font-size: 17px;
+            cursor: pointer; margin-top: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(92,107,192,0.4);
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .result-box {
+            display: none; margin-top: 22px;
+            border-radius: 16px; overflow: hidden;
+            animation: fadeUp 0.4s ease;
+        }
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(12px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        .result-header {
+            padding: 18px 22px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .result-icon { font-size: 32px; }
+        .result-title { font-size: 20px; font-weight: 700; }
+        .result-sub { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+        .normal    .result-header { background: #e8f5e9; color: #2e7d32; }
+        .mental    .result-header { background: #fff8e1; color: #e65100; }
+        .uncertain .result-header { background: #e3f2fd; color: #1565c0; }
+        .result-body { padding: 20px 22px; background: #fff; }
+        .conf-label { font-size: 12px; color: #888; margin-bottom: 6px; text-align: left; }
+        .conf-bar {
+            background: #f0f0f0; border-radius: 8px;
+            height: 10px; margin-bottom: 18px; overflow: hidden;
+        }
+        .conf-fill {
+            height: 100%; border-radius: 8px;
+            background: linear-gradient(90deg, #5c6bc0, #3949ab);
+            transition: width 1.2s ease;
+        }
+        .coping-title { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 10px; }
+        .coping-list { list-style: none; }
+        .coping-list li {
+            padding: 9px 12px; margin-bottom: 6px;
+            background: #f8f9ff; border-radius: 10px;
+            font-size: 14px; color: #444;
+            border-right: 3px solid #5c6bc0;
+            line-height: 1.5;
+        }
+        .helpline {
+            background: #fff3e0; border-radius: 12px;
+            padding: 14px 18px; margin-top: 16px;
+            border: 1px solid #ffcc80; text-align: center;
+        }
+        .helpline h4 { color: #e65100; font-size: 14px; margin-bottom: 8px; }
+        .helpline p { font-size: 13px; color: #555; margin: 3px 0; }
+        .helpline strong { color: #e65100; }
+        .loading { text-align: center; padding: 30px; color: #5c6bc0; font-size: 15px; }
+        .disclaimer {
+            text-align: center; font-size: 11px; color: #bbb;
+            margin-top: 20px; padding-top: 14px;
+            border-top: 1px solid #f0f0f0; line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="header">
+        <div class="icon">💙</div>
+        <h1>ذہنی صحت کا ساتھی</h1>
+        <div class="sub">Mental Health Companion — آپ اکیلے نہیں ہیں</div>
+    </div>
+
+    <div class="input-label">آپ کیسا محسوس کر رہے ہیں؟</div>
+    <textarea id="userInput"
+        placeholder="اردو یا انگریزی میں لکھیں... مثلاً: مجھے بہت اداسی ہو رہی ہے">
+    </textarea>
+
+    <button class="btn" id="analyzeBtn" onclick="analyze()">
+        🔍  تجزیہ کریں
+    </button>
+
+    <div id="resultBox" class="result-box">
+        <div id="loadingDiv" class="loading" style="display:none">
+            ⏳ تجزیہ ہو رہا ہے...
+        </div>
+        <div id="resultContent"></div>
+    </div>
+
+    <div class="disclaimer">
+        ⚠️ یہ صرف ایک تعلیمی AI پروجیکٹ ہے۔<br>
+        کسی بھی ذہنی تکلیف کے لیے ہمیشہ کسی ماہر ڈاکٹر سے رجوع کریں۔
+    </div>
+</div>
+
+<script>
+async function analyze() {
+    const text = document.getElementById('userInput').value.trim();
+    if (!text) { alert('براہ کرم کچھ لکھیں'); return; }
+
+    const btn           = document.getElementById('analyzeBtn');
+    const resultBox     = document.getElementById('resultBox');
+    const loadingDiv    = document.getElementById('loadingDiv');
+    const resultContent = document.getElementById('resultContent');
+
+    btn.disabled = true;
+    btn.textContent = '⏳ تجزیہ ہو رہا ہے...';
+    resultBox.style.display = 'block';
+    resultBox.className = 'result-box';
+    loadingDiv.style.display = 'block';
+    resultContent.innerHTML = '';
+
+    try {
+        const res  = await fetch('/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+        const data = await res.json();
+        loadingDiv.style.display = 'none';
+
+        const styles = {
+            normal:        { cls:'normal',    icon:'✅', label:'آپ ٹھیک ہیں',        sub:'Normal' },
+            mental_health: { cls:'mental',    icon:'⚠️', label:'ذہنی صحت کا مسئلہ', sub:'Mental Health Issue Detected' },
+            uncertain:     { cls:'uncertain', icon:'💙', label:'مزید بتائیں',        sub:'Uncertain — Please share more' }
+        };
+        const s = styles[data.category];
+        resultBox.classList.add(s.cls);
+
+        const copingHTML = data.coping.map(c => `<li>${c}</li>`).join('');
+
+        const helpline = data.category === 'mental_health' ? `
+            <div class="helpline">
+                <h4>🆘 فوری مدد — ابھی رابطہ کریں</h4>
+                <p>Umang Helpline: <strong>0317-4288665</strong></p>
+                <p>Rozan Counseling: <strong>051-2890505</strong></p>
+                <p>Emergency Rescue: <strong>1122</strong></p>
+            </div>` : '';
+
+        resultContent.innerHTML = `
+            <div class="result-header">
+                <div class="result-icon">${s.icon}</div>
+                <div>
+                    <div class="result-title">${data.urdu_result}</div>
+                    <div class="result-sub">${s.sub}</div>
+                </div>
+            </div>
+            <div class="result-body">
+                <div class="conf-label">اعتماد کی سطح: ${data.confidence}%</div>
+                <div class="conf-bar">
+                    <div class="conf-fill" id="confFill" style="width:0%"></div>
+                </div>
+                <div class="coping-title">💡 آج کے لیے مشورے:</div>
+                <ul class="coping-list">${copingHTML}</ul>
+                ${helpline}
+            </div>`;
+
+        setTimeout(() => {
+            document.getElementById('confFill').style.width = data.confidence + '%';
+        }, 100);
+
+    } catch(err) {
+        loadingDiv.style.display = 'none';
+        resultContent.innerHTML = '<p style="color:red;padding:15px">خرابی — دوبارہ کوشش کریں</p>';
+    }
+
+    btn.disabled = false;
+    btn.textContent = '🔍  تجزیہ کریں';
+}
+
+document.getElementById('userInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); analyze(); }
+});
+</script>
+</body>
+</html>
